@@ -8,7 +8,9 @@ using BlockLimiter.Settings;
 using BlockLimiter.Utility;
 using Sandbox.Definitions;
 using Sandbox.Game.Entities;
+using Sandbox.Game.Entities.Blocks;
 using Sandbox.Game.World;
+using Sandbox.ModAPI.Ingame;
 using Torch;
 using Torch.Commands;
 using Torch.Commands.Permissions;
@@ -99,8 +101,14 @@ namespace BlockLimiter.Commands
                 Context.Respond(sb.ToString());
                 return;
             }
-
-            ModCommunication.SendMessageTo(new DialogMessage(BlockLimiterConfig.Instance.ServerName,"List of Limits",sb.ToString()),Context.Player.SteamUserId);
+            if (Utilities.TryGetAimedTextPanel(Context.Player, out MyTextPanel textpanel) && Utilities.CheckPermissionTextPanel(Context.Player, textpanel))
+            {
+                ((IMyTextSurface)textpanel).WriteText("List of Limits\n" + sb.ToString());
+            }
+            else
+            {
+                ModCommunication.SendMessageTo(new DialogMessage(BlockLimiterConfig.Instance.ServerName, "List of Limits", sb.ToString()), Context.Player.SteamUserId);
+            }
         }
         
         [Command("pairnames", "gets the list of all pair names possible")]
@@ -172,7 +180,7 @@ namespace BlockLimiter.Commands
                 return;
             }
 
-            ModCommunication.SendMessageTo(new DialogMessage(BlockLimiterConfig.Instance.ServerName,"List of pair names",sb.ToString()),Context.Player.SteamUserId);
+            ModCommunication.SendMessageTo(new DialogMessage(BlockLimiterConfig.Instance.ServerName,"List of pair names", sb.ToString()), Context.Player.SteamUserId);
         }
 
 

@@ -35,7 +35,6 @@ namespace BlockLimiter.Utility
     {
         [ReflectedStaticMethod(Type = typeof(MyCubeBuilder), Name = "SpawnGridReply", OverrideTypes = new []{typeof(bool), typeof(ulong)})]
         private static Action<bool, ulong> _spawnGridReply;
-
         public static string GetPlayerNameFromSteamId(ulong steamId)
         {
             var pid = MySession.Static.Players.TryGetIdentityId(steamId);
@@ -266,6 +265,33 @@ namespace BlockLimiter.Utility
 
             return sb;
 
+        }
+
+        public static bool TryGetAimedTextPanel(IMyPlayer player, out MyTextPanel textpanel)
+        {
+            if (player.Character is MyCharacter character && character.AimedGrid != 0)
+            {
+                var aimedBlock = (MyEntities.GetEntityById(character.AimedGrid) as MyCubeGrid)
+                    ?.GetCubeBlock(character.AimedBlock);
+                if (aimedBlock?.BlockDefinition is MyTextPanelDefinition)
+                {
+                    textpanel = aimedBlock.FatBlock as MyTextPanel; 
+                    return true;
+                }
+            }
+            textpanel = null;
+            return false;
+        }
+
+        public static bool CheckPermissionTextPanel(IMyPlayer player, MyCubeBlock textpanel)
+        {
+            if (textpanel.OwnerId == 0) return true;
+
+            var relation = textpanel.GetUserRelationToOwner(player.IdentityId);
+            if (relation != MyRelationsBetweenPlayerAndBlock.Owner &&
+                relation != MyRelationsBetweenPlayerAndBlock.FactionShare) return false;
+
+            return true;
         }
 
         #endregion
